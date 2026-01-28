@@ -26,6 +26,7 @@ The project also includes a **GUI built with Streamlit** for interactive usage.
 - JSON-LD metadata
 - iframe-based social media embeds
 - Fallback logic for different websites
+- reduce bot detection
 
 ✅ Interactive GUI:
 - Enter article URL
