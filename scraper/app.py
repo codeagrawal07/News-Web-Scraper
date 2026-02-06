@@ -5,7 +5,6 @@ from bs4 import BeautifulSoup
 import article_parser
 import requests
 import random
-from gtts import gTTS
 import os
 user_agents = [
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
@@ -54,14 +53,6 @@ indToday=id(url)
 if indToday==1:
     temp=1
 index=id(url) 
-
-def text2speech(text):
-    if text:
-        tts = gTTS(text=text, lang='en',tld='co.in')
-        tts.save("speech1.mp3")
-        st.audio("speech1.mp3", format="audio/mp3")
-    else:
-        st.warning("Please enter some text.")
   
 if st.button("Fetch News") and url:
     with st.spinner("Fetching article..."):
@@ -82,7 +73,6 @@ if st.button("Fetch News") and url:
         st.markdown(f"**Author:** {author}")
         st.markdown(f"**Description:** {desc}")
        
-        # text2speech(content)
         st.subheader("Article Content")
         st.write(content)
 
@@ -149,3 +139,4 @@ if st.button("Fetch News") and url:
                             scrolling=True
                         )
                             
+
