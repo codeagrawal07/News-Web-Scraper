@@ -22,33 +22,38 @@ def get_Title(soup):
     
     og = soup.find('meta', {"property": "og:title"})
     if og and og.get("content"):
-        return og["content"]
-
-    h1 = soup.find("h1")
+        return og["content"].split("|")[0]
+ 
+    h1 = soup.find("h1").split("|")[0]
     return h1.text.strip() if h1 else "Not Found"
       
-def get_author(soup):
+def get_author(id,soup):
     # INDIA TODAY
-    
-    author_divs = soup.find_all("div", class_="authdetaisl")
-    if author_divs:
-        return author_divs[0].get_text(strip=True)
+    if id==1:
+        author_divs = soup.find_all("div", class_="authdetaisl")
+        if author_divs:
+            return author_divs[0].get_text(strip=True)
     
     #ZEE NEWS
-    
-    zee_author = soup.find("span", class_="aaticleauthor_name")
-    if zee_author:
-        text=zee_author.get_text()
-        return text
+    if id==3:
+        zee_author = soup.find("span", class_="aaticleauthor_name")
+        if zee_author:
+            text=zee_author.get_text()
+            return text
     
     #HINDUSTAN TIMES
-    
-    small = soup.find("small")
-    if small:
-        return small.get_text(strip=True)
-    
-    return "Not Found"
+    if id==2:
+        small = soup.find("small")
+        if small:
+            return small.get_text(strip=True)
+        
+    #MINT NEWS meta name="author" content="Sounak Mukhopadhyay" 
+    if id==4:
+        mint_author=soup.find("meta",{"name":"author"})
+        if mint_author:
+            return mint_author.get("content")
 
+    return "Not Found"
  
 def get_Date(soup):
 
@@ -65,7 +70,6 @@ def shor_description(soup):
         return short_desc["content"].strip()
     else:
         return "Not Found"
-
 
 
 def get_Context(id,soup):
@@ -175,6 +179,14 @@ def get_Context(id,soup):
         else:
             print("Article container not found.")
         return "\n".join(cleaned_lines) 
+    if id==4:
+        cont=soup.find_all("div",class_="storyParagraph")
+        content=[]
+        for p in cont:
+            text=p.get_text()
+            content.append(text+"\n")
+        return "\n".join(content)
+        
     
 def get_image(id,soup):
     
@@ -233,7 +245,33 @@ def get_image(id,soup):
             return img_list
         except:
             None
-            
+    if id==4:
+        img_all=soup.find("figure")
+        img_list=[]
+
+        img_list.append({
+                "imgURL":img_all.find("img").get('src') or "" ,
+                "imgTitle":img_all.find('img').get('title') or"",
+                "imgAlt":img_all.find("img").get('alt') or"" 
+                })
+        return img_list    
+    
+def extract_twitter_links(soup):
+    import json, re
+
+    script = soup.find("script",type="application/json")
+    if not script:
+        return []
+
+    data = json.loads(script.string)
+    data_str = json.dumps(data)
+
+    links = re.findall(
+        r"https?://twitter\.com/[A-Za-z0-9_]+/status/\d+",
+        data_str
+    )
+    
+    return list(set(links))                    
                    
 def get_social_media_Link(id,soup):
         list_of_links=[]
@@ -246,6 +284,13 @@ def get_social_media_Link(id,soup):
                         list_of_links.append({
                             "link":fram.get('src') or"",
                             "source":"other"})
+                        
+            listofTweet=extract_twitter_links(soup)
+            if listofTweet:
+                for link in listofTweet:
+                        list_of_links.append({
+                            "link":link or"",
+                            "source":"twitter"})                
             return list_of_links            
         if id==0:               
             listofReddit=soup.find_all("blockquote", class_="reddit-embed-bq")            
@@ -265,27 +310,13 @@ def get_social_media_Link(id,soup):
                         list_of_links.append({
                             "link":link or"",
                             "source":"instagram"})
-            listofTweet=soup.find_all('div', class_='ht-twitter-embed')            
+           
+            listofTweet=extract_twitter_links(soup)
             if listofTweet:
-                for post in listofTweet:
-                    link = post.get("data-twitter-src")
-                    if link:
+                for link in listofTweet:
                         list_of_links.append({
                             "link":link or"",
-                            "source":"twitter"})
-                        
-            listofTweetZee = soup.find_all('blockquote', class_="twitter-tweet")
-            if listofTweetZee:
-                for post in listofTweetZee:
-                    anchors = post.find_all('a')
-                    for a in anchors:
-                        href = a.get('href')
-                        if href and href.startswith("https://twitter.com/"):
-                            list_of_links.append({
-                                "link": href,
-                                "source": "twitter"
-                            })
-             
+                            "source":"twitter"}) 
       
 
             fb_links = re.findall(
@@ -297,7 +328,7 @@ def get_social_media_Link(id,soup):
                 {"link": link, "source": "other"}
                 for link in set(fb_links)
             ]
-            list_of_links.extend(fb_links)  
+            list_of_links.extend(fb_links)
                      
             return list_of_links 
                 
