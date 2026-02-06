@@ -5,7 +5,8 @@ from bs4 import BeautifulSoup
 import article_parser
 import requests
 import random
-
+from gtts import gTTS
+import os
 user_agents = [
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
@@ -23,7 +24,6 @@ def scrape_page(url):
     response=session.get(url)
     
     return response.text
-
 
 st.set_page_config(page_title="News Scraper", layout="wide")
 
@@ -46,13 +46,22 @@ def id(url):
 
     if "zeenews.india.com" in domain or "zeenews.com" in domain:
         return 3
-
+    if "livemint.com" in domain:
+        return 4
     return 0
 temp=0
 indToday=id(url)
 if indToday==1:
     temp=1
 index=id(url) 
+
+def text2speech(text):
+    if text:
+        tts = gTTS(text=text, lang='en',tld='co.in')
+        tts.save("speech1.mp3")
+        st.audio("speech1.mp3", format="audio/mp3")
+    else:
+        st.warning("Please enter some text.")
   
 if st.button("Fetch News") and url:
     with st.spinner("Fetching article..."):
@@ -61,7 +70,7 @@ if st.button("Fetch News") and url:
 
         title = article_parser.get_Title(soup)
         date = article_parser.get_Date(soup)
-        author=article_parser.get_author(soup)
+        author=article_parser.get_author(index,soup)
         desc = article_parser.shor_description(soup)
         content = article_parser.get_Context(index,soup)
         images = article_parser.get_image(index,soup)
@@ -72,7 +81,8 @@ if st.button("Fetch News") and url:
         st.markdown(f"**Date:** {date}")
         st.markdown(f"**Author:** {author}")
         st.markdown(f"**Description:** {desc}")
-
+       
+        # text2speech(content)
         st.subheader("Article Content")
         st.write(content)
 
@@ -127,7 +137,7 @@ if st.button("Fetch News") and url:
                                 <script async src="https://platform.twitter.com/widgets.js"
                                         charset="utf-8"></script>
                                 """,
-                                height=550
+                                height=750
                             )
  
                     if media['source'] == 'other' :
@@ -138,3 +148,4 @@ if st.button("Fetch News") and url:
                             height=400,
                             scrolling=True
                         )
+                            
