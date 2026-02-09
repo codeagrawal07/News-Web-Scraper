@@ -184,6 +184,8 @@ def get_Context(id,soup):
         content=[]
         for p in cont:
             text=p.get_text()
+            if text.startswith("Also Read"):
+                continue 
             content.append(text+"\n")
         return "\n".join(content)
         
@@ -335,3 +337,4 @@ def get_social_media_Link(id,soup):
                 
                 
             
+
