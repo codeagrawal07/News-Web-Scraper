@@ -67,7 +67,7 @@ def get_Date(soup):
 def shor_description(soup):
     short_desc = soup.find('meta', {"name": "description"})
     if short_desc:
-        return short_desc["content"].strip()
+        return short_desc["content"].split("|")[0]
     else:
         return "Not Found"
 
@@ -346,6 +346,7 @@ def get_social_media_Link(id,soup):
                 
                 
             
+
 
 
 
