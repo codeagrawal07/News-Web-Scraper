@@ -325,7 +325,7 @@ def get_social_media_Link(id,soup):
                 r'https://www\.facebook\.com/plugins[^"\']+',
                 str(soup)
             )
-             yt_links = re.findall(
+            yt_links = re.findall(
                 r'https://www\.youtube\.com/embed/[^"\']+',
                 str(soup)
             )
@@ -346,5 +346,6 @@ def get_social_media_Link(id,soup):
                 
                 
             
+
 
 
